@@ -23,7 +23,7 @@ composer install phpfastcache/mongodb-extension
 ```
 
 #### ⚠️ This extension requires:
-1️ The composer `mongodb/mongodb` library `1.10` at least.\
+1️ The composer `mongodb/mongodb` library `1.10` at least.
 
 ## Events
 This driver is currently not emitting [customs events](https://github.com/PHPSocialNetwork/phpfastcache/blob/master/docs/EVENTS.md).

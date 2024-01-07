@@ -27,4 +27,5 @@ if (!file_exists($configFileName)) {
 
 $cacheInstance = CacheManager::getInstance('Mongodb', include $configFileName);
 $testHelper->runCRUDTests($cacheInstance);
+$testHelper->runGetAllItemsTests($cacheInstance);
 $testHelper->terminateTest();

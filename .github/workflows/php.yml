@@ -58,4 +58,6 @@ jobs:
         run: composer run-script quality
 
       - name: Run tests
+        env:
+          MONGODB_AUTH_SOURCE: admin
         run: composer run-script tests

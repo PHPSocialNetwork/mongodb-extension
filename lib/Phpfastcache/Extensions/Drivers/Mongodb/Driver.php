@@ -48,15 +48,9 @@ class Driver implements AggregatablePoolInterface
 
     public const MONGODB_INDEX_KEY = '_id';
 
-    /**
-     * @var Collection
-     */
-    public $collection;
+    public Collection $collection;
 
-    /**
-     * @var Database
-     */
-    public $database;
+    public Database $database;
 
     protected string $documentPrefix;
 
@@ -374,7 +368,7 @@ class Driver implements AggregatablePoolInterface
                 $password ? ":{$password}" : '',
                 $username ? '@' : '',
                 $host,
-                $port !== 27017 && $port !== false ? ":{$port}" : '',
+                $port !== false ? ":{$port}" : '',
                 $databaseName ? "/{$databaseName}" : '',
                 count($options) > 0 ? '?' . http_build_query($options) : '',
             ]

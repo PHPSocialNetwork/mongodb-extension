@@ -3,6 +3,7 @@
 use Phpfastcache\Drivers\Mongodb\Config as MongodbConfig;
 
 return (fn(MongodbConfig $config) => $config->setItemDetailedDate(true)
+    ->setHost('127.0.0.1')
     ->setDatabaseName('pfc_test')
     ->setCollectionName('pfc_test')
     ->setUsername('test')

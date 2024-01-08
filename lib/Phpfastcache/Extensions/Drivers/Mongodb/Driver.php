@@ -17,13 +17,11 @@ declare(strict_types=1);
 namespace Phpfastcache\Extensions\Drivers\Mongodb;
 
 use LogicException;
-use MongoClient;
 use MongoDB\BSON\Binary;
 use MongoDB\BSON\UTCDateTime;
 use MongoDB\Client;
 use MongoDB\Collection;
 use MongoDB\Database;
-use MongoDB\DeleteResult;
 use MongoDB\Driver\Command;
 use MongoDB\Driver\Exception\Exception as MongoDBException;
 use MongoDB\Driver\Manager;
@@ -32,6 +30,7 @@ use Phpfastcache\Core\Pool\ExtendedCacheItemPoolInterface;
 use Phpfastcache\Core\Pool\TaggableCacheItemPoolTrait;
 use Phpfastcache\Core\Item\ExtendedCacheItemInterface;
 use Phpfastcache\Entities\DriverStatistic;
+use Phpfastcache\Exceptions\PhpfastcacheDriverCheckException;
 use Phpfastcache\Exceptions\PhpfastcacheDriverException;
 use Phpfastcache\Exceptions\PhpfastcacheInvalidArgumentException;
 use Phpfastcache\Exceptions\PhpfastcacheLogicException;
@@ -56,20 +55,19 @@ class Driver implements AggregatablePoolInterface
 
     /**
      * @return bool
+     * @throws PhpfastcacheDriverCheckException
      */
     public function driverCheck(): bool
     {
-        $mongoExtensionExists = class_exists(Manager::class);
+        $mongodbExtensionExists = extension_loaded('mongodb');
 
-        if (!$mongoExtensionExists && class_exists(MongoClient::class)) {
-            trigger_error(
-                'This driver is used to support the pecl MongoDb extension with mongo-php-library.
-            For MongoDb with Mongo PECL support use Mongo Driver.',
-                E_USER_ERROR
+        if (!$mongodbExtensionExists && extension_loaded('mongo')) {
+            throw new PhpfastcacheDriverCheckException(
+                'This driver is used to support the pecl MongoDb extension with mongo-php-library. Mongo extension is no longer supported',
             );
         }
 
-        return $mongoExtensionExists && class_exists(Collection::class);
+        return $mongodbExtensionExists && class_exists(Collection::class);
     }
 
     /**
@@ -310,10 +308,13 @@ class Driver implements AggregatablePoolInterface
 
         return (new DriverStatistic())
             ->setInfo(
-                'MongoDB version ' . $serverStats->version . ', Uptime (in days): ' . round(
-                    $serverStats->uptime / 86400,
-                    1
-                ) . "\n For more information see RawData."
+                sprintf(
+                    'MongoDB version %s, client version %s, SDK version %s.  Uptime (in days): %s',
+                    $serverStats->version,
+                    phpversion('mongodb'),
+                    \Composer\InstalledVersions::getVersion('mongodb/mongodb'),
+                    round($serverStats->uptime / 86400, 2)
+                )
             )
             ->setSize($collectionStats->size)
             ->setData(implode(', ', array_keys($this->itemInstances)))
